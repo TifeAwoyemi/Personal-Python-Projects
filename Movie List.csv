@@ -1,0 +1,26 @@
+Movie_Name,ID,Genre,Release_Year,URL_Link,Price
+Top Gun: Maverick,Act1,Action,2022,Act1@movie.com,20
+Mission: Impossible - Fallout,Act2,Action,2018,Act2@movie.com,15
+The Terminator 2: Judgment Day,Act3,Action,1991,Act3@movie.com,25
+The Dark Knight,Act4,Action,2008,Act4@movie.com,13
+Inception,Act5,Action,2010,Act5@movie.com,15
+Robin Hood: Prince of Thieves,Adv1,Adventure,1991,Adv1@movie.com,18
+Stardust,Adv2,Adventure,2007,Adv2@movie.com,9
+Alice in Wonderland,Adv3,Adventure,2010,Adv3@movie.com,10
+The Jungle Book,Adv4,Adventure,2016,Adv4@movie.com,18
+Jumanji: Welcome to the Jungle,Adv5,Adventure,2017,Adv5@movie.com,20
+Peter Pan,Fan1,Fantasy,2003,Fan1@movie.com,17
+Big Fish,Fan2,Fantasy,2003,Fan2@movie.com,21
+Pinocchio,Fan3,Fantasy,2019,Fan3@movie.com,23
+Harry Potter and the Sorcerer's Stone ,Fan4,Fantasy,2001,Fan4@movie.com,11
+The BFG,Fan5,Fantasy,2016,Fan5@movie.com,10
+12 Years a Slave,His1,Historical,2013,His1@movie.com,21
+Hidden Figures,His2,Historical,2016,His2@movie.com,24
+Saving Private Ryan,His3,Historical,1998,His3@movie.com,14
+Titanic,His4,Historical,1997,His4@movie.com,15
+Gladiator,His5,Historical,2000,His5@movie.com,5
+The Notebook,Rom1,Romance,2004,Rom1@movie.com,13
+A Walk to Remember,Rom2,Romance,2002,Rom2@movie.com,12
+Pride and Prejudice,Rom3,Romance,2005,Rom3@movie.com,18
+Pretty Woman,Rom4 ,Romance,1990,Rom4@movie.com,19
+The Fault in Our Stars,Rom5,Romance,2014,Rom5@movie.com,16
