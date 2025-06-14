@@ -1,0 +1,369 @@
+---
+title: "Day 8: SQL"
+subtitle: "IMSI Data Science Summer Workshop Series 2025"
+author: "Awoyemi & Babyale"
+date: today
+format: 
+  html:
+    embed-resources: true
+    toc: true
+editor: 
+  markdown: 
+    wrap: 72
+---
+
+# Exercise 1: Places - Designing the Place of the Future
+
+Note, from Exercise 1 to Exercise 3, we make the assumption that
+`db_places` is the name of the data base connection. Recall that Quarto
+supports the use of a SQL engine so long as a connection is specified in
+the code chunk options.
+
+In particular, please make sure code chunks are constructed using
+
+```{{sql}}
+--| label: my-label
+--| connection: db_places
+
+-- SQL Code
+```
+
+------------------------------------------------------------------------
+
+In this exercise, we explore setting up a database and creating a table.
+
+-   Establish a connection to the file-backed database `my_data.sqlite`.
+-   Design a table called `MyPlaces` with the following fields:
+    -   `Name`: a varchar field containing the name of the place.
+    -   `Category`: a varchar field that describes the place based on
+        the top categories from
+        [Yelp](https://blog.yelp.com/businesses/yelp_category_list/).
+    -   `TravelTime`: an integer from the Chicago to the place.
+    -   `DateVisited`: a varchar field that is interpreted as a date
+        (**YYYY-MM-DD**) containing the last time you visited the place.
+    -   `Recommendation`: an integer field that is interpreted as a
+        boolean containing whether you would recommend the place (1) or
+        not (0).
+
+::: callout-note
+If you are on Windows, please use the in-memory option:
+:::
+
+```{r}
+library(DBI)
+
+if(file.exists("MyPlaces.sqlite")) delete_old <- file.remove("MyPlaces.sqlite")
+
+db_places = DBI::dbConnect(RSQLite::SQLite(), name = ":memory:")
+
+```
+
+```{sql}
+--| label: create-table
+--| connection: db_places
+
+
+CREATE TABLE MyPlaces (
+Name VARCHAR,
+Category VARCHAR,
+TravelTime INTEGER,
+DateVisited VARCHAR,
+Recommendation INTEGER,
+PRIMARY KEY (Name)
+);
+
+```
+
+# Exercise 2: Places - Populating Places
+
+Within this exercise, the focus is on populating or filling the table
+just designed.
+
+-   Populate the tables created in **Exercise 1** with at least 7
+    places.
+-   Please make sure there is at least one place for each of the
+    following categories:
+    -   recommended, not recommended, and has yet to receive a
+        recommendation (`NULL`),
+    -   within 10 minutes, 45 minutes, and 180 minutes; and,
+    -   visited within the week, the month, and the year.
+
+```{sql}
+--| label: insert-into-table
+--| connection: db_places
+
+INSERT INTO MyPlaces VALUES
+("Lubbock", "Education", 10, "2025-06-10", 1),
+("Amarillo", "Automotive", 180, "2025-01-15", 0),
+("Ransom Canyon", "Education", 10, "2025-05-24", 0),
+("Little Field", "Food", 45, "2025-06-07", NULL),
+("Wolfforth", "Entertainment", 45, "2025-03-21", 1),
+("Boise", "Active Life", 180, "2025-04-20", 1),
+("Garden City", "Entertainment", 45, "2025-05-31", NULL);
+
+```
+
+```{r}
+
+dbReadTable(db_places, "Myplaces")
+```
+
+# Exercise 3: Places - Querying Places
+
+In the last exercise in this series, we seek to query the table and
+understand what data is present.
+
+-   Write multiple queries to learn about the data in the `MyPlace`
+    table that answer the following questions:
+    1.  What places require less than 45 minutes of travel time from
+        Chicago?
+    2.  What places would you not recommend?
+    3.  How frequently does each category appear in the data?
+    4.  What places have you not visited in the last week?
+-   Write a single query that returns a count of the categories of
+    places that you would recommend.
+-   Write a single query that identifies places you recommend but have
+    not visited for at least one month.
+-   Write a query that lists the name of the place and the
+    recommendation text that matches:
+    -   If you would recommend the place, the text should read: "Seal of
+        Approval by <Firstname>!"
+    -   If you would **not** recommend the place, the text should read:
+        "Not the best place to visit..."
+
+```{sql connection = db_places}
+--| label: Places-Querying-Places1
+--| connection: db_places
+
+SELECT Name, TravelTime FROM MyPlaces WHERE TravelTime < 45;
+
+```
+
+```{sql connection = db_places}
+--| label: Places-Querying-Places2
+--| connection: db_places
+
+SELECT Name, Recommendation FROM MyPlaces WHERE Recommendation == 0;
+
+```
+
+```{sql connection = db_places}
+--| label: Places-Querying-Places3
+--| connection: db_places
+
+SELECT Category, COUNT(Category) as Frequency FROM MyPlaces GROUP BY Category;
+
+```
+
+```{sql connection = db_places}
+--| label: Places-Querying-Places4
+--| connection: db_places
+
+SELECT Name, DateVisited FROM MyPlaces WHERE JULIANDAY("2025-06-13") - JULIANDAY(DateVisited) > 7;
+```
+
+```{sql connection = db_places}
+--| label: Places-Querying-Places5
+--| connection: db_places
+
+-- SELECT Recommendation, Category FROM MyPlaces WHERE Recommendation == 1;
+
+SELECT Recommendation, COUNT(Category) AS Count FROM MyPlaces WHERE Recommendation == 1;
+
+```
+
+```{sql connection = db_places}
+--| label: Places-Querying-Places6
+--| connection: db_places
+
+SELECT * FROM MyPlaces WHERE Recommendation == 1 and JULIANDAY("2025-06-13") - JULIANDAY(DateVisited) > 30;
+```
+
+```{sql connection = db_places}
+--| label: Places-Querying-Places7
+--| connection: db_places
+
+SELECT Name,
+CASE
+    WHEN Recommendation = 1 THEN 'Seal of Approval by !'
+    ELSE 'Not the best place to visit…'
+END AS RecommendationText
+FROM MyPlaces;
+```
+
+```{sql connection = db_places}
+--| label: Places-Querying-Places8
+--| connection: db_places
+
+SELECT Name, Recommendation FROM MyPlaces WHERE Recommendation == 0;
+```
+
+# Exercise 4: Batter - DBI
+
+Note, from Exercise 4 to Exercise 6, we make the assumption that
+`db_lahman` is the name of the data base connection. Recall that Quarto
+supports the use of a SQL engine so long as a connection is specified in
+the code chunk options.
+
+In particular, please make sure code chunks are constructed using
+
+```{{sql}}
+--| label: my-label
+--| connection: db_lahman
+
+-- SQL Code
+```
+
+## (a) Obtaining Data
+
+Download the Lahman baseball data set from:
+<https://github.com/coatless/raw-data/blob/main/lahman2016.sqlite?raw=true>
+using *R*'s `download.file()` function.
+
+Add the `cache: TRUE` code chunk option to avoid redownloading the file
+multiple times when rendering the Quarto document
+
+```{r}
+#| label: download-lahman
+#| cache: true
+
+# Code here
+```
+
+## (b) Connecting to the Database
+
+Create a connection to the `lahman2016.sqlite` SQLite database called
+`db`.
+
+```{r}
+# Code here
+```
+
+## (c) Determining Tables
+
+List all the tables that are inside the `db_lahman` connection.
+
+```{r}
+# Code here
+
+```
+
+## (d) Naming Fields
+
+What are the names of all the columns in the `Salaries` and `Teams`
+tables?
+
+```{r}
+# Code here
+```
+
+## (e) Pulling data into R
+
+Retrieve the `salaries` table using the `db_lahman` connection and bring
+it into *R* using the same name.
+
+```{r}
+# code here
+```
+
+# Exercise 5: Batter - Querying
+
+## (a)
+
+Create a SQL query embedded in Quarto that counts the average number of
+home runs in the entire `Batting` table.
+
+*Hints*:
+
+-   You will need to use: `SELECT`, `AVG`, and `AS`.
+-   The result should only contain **one** field -- `average_hr` -- and
+    **1** record.
+
+## (b)
+
+Improve the SQL query developed in **b** and embedded in the Quarto
+document by:
+
+-   calculating the average for **each team**,
+-   show only teams that have an average equal to or greater than
+    **3.5**, and
+-   listing the name of the team.
+
+*Hints*:
+
+-   You will need to use: `SELECT`, `AVG`, `AS`, `JOIN`, `GROUP BY`, and
+    `HAVING`.
+-   The result should only contain **two** fields -- `name` and
+    `average_hr` -- and **16** records.
+-   The `name` column in `Teams` contains the team name.
+    -   Join the `Teams` and `Batting` tables by `teamID` and `yearID`.
+-   To handle the `ambiguous column name` error requires specifying the
+    table name prior to using the variable in the `SELECT ...` portion,
+    e.g. `table.variable`
+
+## (c)
+
+Modify the **c** SQL query embedded in Quarto so that it tabulates the
+average number of home runs for each player in the `Batting` table:
+
+-   **from 1975 onwards**,
+-   **takes only players with an overall average number of homeruns to
+    be greater than 10**, and
+-   **sorts them in descending order**.
+
+*Hints*:
+
+-   You will need to use: `SELECT`, `AVG()`, `AS`, `WHERE`, `GROUP BY`,
+    `HAVING`, `ORDER BY`, and `DESC`.
+-   The result should only contain **two** fields -- `playerID` and
+    `average_hr` -- and **548** records.
+-   Recall the difference between `HAVING` and `WHERE`.
+
+# Exercise 6: Batter - Compute and Retrieve
+
+## (a)
+
+Write a SQL query embedded in Quarto that computes the total salary
+expenditures for each team for the year 2016.
+
+*Hints*:
+
+-   You will need to use: `SELECT`, `SUM`, `AS`, `WHERE`, and
+    `GROUP BY`.
+-   The result should only contain **two** fields -- `teamID` and
+    `total_salary` -- and **30** records.
+-   Set the `output.var` code chunk option to be equal to
+    `salary_teamid_info` so that the `data.frame` is available to *R*.
+
+## (b)
+
+Graph the results from **a** on a bar plot created using
+[`geom_col()`](https://ggplot2.tidyverse.org/reference/geom_bar.html)
+from [`ggplot2`](https://ggplot2.tidyverse.org/). Consider looking at
+examples on [R Graph Gallery](https://www.r-graph-gallery.com/) for help
+in constructing the plot.
+
+By looking at the graph, what team had the highest payouts to their
+players in 2016?
+
+*Hint*: Rotate text on the x-axis of ggplot with
+`theme(axis.text.x = element_text(angle = 45, hjust = 1))`.
+
+## (c)
+
+Instead of calculating only a single year, compute the total salaries
+for each year spanning from 1990 to 2016. Graph the result on a line
+plot using
+[`geom_line()`](https://ggplot2.tidyverse.org/reference/geom_line.html)
+from [`ggplot2`](https://ggplot2.tidyverse.org/). Graph each team's line
+in a different column.
+
+*Hints*:
+
+-   You will need to use: `SELECT`, `SUM`, `AS`, `WHERE`, and
+    `GROUP BY`.
+    -   Psst, to specify multiple groups place a comma between them!
+-   The result should only contain **three** fields -- `teamID`,
+    `yearID`, and `total_salary` -- and **788** records.
+-   Set the `output.var` code chunk option to be equal to
+    `salary_teamid_yearly` so that the `data.frame` is available to *R*.
